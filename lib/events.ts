@@ -22,20 +22,30 @@ export async function createEvent(
 ): Promise<{ error: string | null }> {
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return { error: 'Please log in again before creating an event.' };
+  }
 
   const { error } = await supabase.from('events').upsert(
     {
-      event_code: event.eventId,
-      title: event.title,
+      event_code: event.eventId.trim(),
+      title: event.title.trim(),
       start_time: event.start || null,
       end_time: event.end || null,
-      created_by: user?.id ?? null,
+      created_by: user.id,
     },
     { onConflict: 'event_code' }
   );
 
-  return { error: error?.message ?? null };
+  if (error) {
+    console.log('CREATE EVENT ERROR:', error.message);
+    return { error: error.message };
+  }
+
+  return { error: null };
 }
 
 export async function getEventsByTeacher(
@@ -47,11 +57,12 @@ export async function getEventsByTeacher(
     .eq('created_by', teacherId)
     .order('created_at', { ascending: false });
 
-  if (error || !data) {
-    return [];
+  if (error) {
+    console.log('GET EVENTS ERROR:', error.message);
+    throw new Error(error.message);
   }
 
-  return data as CloudEvent[];
+  return (data ?? []) as CloudEvent[];
 }
 
 export async function getEventByCode(
@@ -60,12 +71,13 @@ export async function getEventByCode(
   const { data, error } = await supabase
     .from('events')
     .select('*')
-    .eq('event_code', code)
+    .eq('event_code', code.trim())
     .maybeSingle();
 
-  if (error || !data) {
+  if (error) {
+    console.log('GET EVENT BY CODE ERROR:', error.message);
     return null;
   }
 
-  return data as CloudEvent;
+  return data as CloudEvent | null;
 }

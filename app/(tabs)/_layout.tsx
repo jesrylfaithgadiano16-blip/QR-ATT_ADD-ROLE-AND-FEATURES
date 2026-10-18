@@ -8,7 +8,9 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: COLORS.primary,
-        headerStyle: { backgroundColor: COLORS.background },
+        headerStyle: {
+          backgroundColor: COLORS.background,
+        },
         headerShadowVisible: false,
         headerTintColor: COLORS.textPrimary,
         tabBarStyle: {
@@ -81,6 +83,24 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? 'clipboard' : 'clipboard-outline'}
+              color={color}
+              size={24}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="admin"
+        options={{
+          title: 'Admin',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={
+                focused
+                  ? 'shield-checkmark'
+                  : 'shield-checkmark-outline'
+              }
               color={color}
               size={24}
             />
